@@ -4,6 +4,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.io.File;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class LumiGit{
   public static void main(String[] args){
@@ -25,6 +27,7 @@ public class LumiGit{
     Path path = Paths.get(file);
 
     try{
+      MessageDigest md = MessageDigest.getInstance("SHA-1");
       byte[] fileBytes = Files.readAllBytes(path);
 
       String header = "blob "+fileBytes.length+"\0";
@@ -34,14 +37,23 @@ public class LumiGit{
       System.arraycopy(headerBytes, 0, objectBytes, 0, headerBytes.length);
       System.arraycopy(fileBytes, 0, objectBytes, headerBytes.length, fileBytes.length);
 
-      System.out.println(headerBytes.length);
-      System.out.println(fileBytes.length);
-      System.out.println(objectBytes.length);
+      md.update(objectBytes);
+      byte[] hashBytes = md.digest();
 
-    } catch(IOException e){
+      StringBuilder hexString = new StringBuilder();
+      for(byte b: hashBytes){
+        String hex = Integer.toHexString(0xff & b);
+        if(hex.length() == 1) hexString.append('0');
+        hexString.append(hex);
+
+      }
+
+      System.out.println(objectBytes);
+      System.out.println(hexString.toString());
+
+    } catch(IOException | NoSuchAlgorithmException e){
       e.printStackTrace();
     }
-
 
 
   }
