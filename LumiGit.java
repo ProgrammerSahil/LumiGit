@@ -1,3 +1,4 @@
+import java.nio.charset.StandardCharsets;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,6 +26,17 @@ public class LumiGit{
 
     try{
       byte[] fileBytes = Files.readAllBytes(path);
+
+      String header = "blob "+fileBytes.length+"\0";
+      byte[] headerBytes = header.getBytes(StandardCharsets.UTF_8);
+
+      byte[] objectBytes = new byte[headerBytes.length+fileBytes.length];
+      System.arraycopy(headerBytes, 0, objectBytes, 0, headerBytes.length);
+      System.arraycopy(fileBytes, 0, objectBytes, headerBytes.length, fileBytes.length);
+
+      System.out.println(headerBytes.length);
+      System.out.println(fileBytes.length);
+      System.out.println(objectBytes.length);
 
     } catch(IOException e){
       e.printStackTrace();
