@@ -48,7 +48,6 @@ public class LumiGit{
 
       }
 
-      System.out.println(objectBytes);
       System.out.println(hexString.toString());
 
     } catch(IOException | NoSuchAlgorithmException e){
