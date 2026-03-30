@@ -1,0 +1,8 @@
+# Compiled Java code
+*.class
+
+# Your custom MiniGit database
+.LumiGit/
+
+# macOS system files
+.DS_Store
