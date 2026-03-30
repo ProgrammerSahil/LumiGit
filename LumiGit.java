@@ -49,14 +49,19 @@ public class LumiGit{
       }
 
       String folder = hexString.toString().substring(0,2);
-      String fileName = hexString.toString().substring(2, hexString.toString().length());
+      String fileName = hexString.toString().substring(2);
 
       if(!Files.exists(Paths.get(".LumiGit"))){
         System.out.println("Initialize first");
         return;
       }
 
-      Files.createDirectories(Paths.get(".LumiGit", "objects", folder));
+      Path bytesPath = Paths.get(".LumiGit", "objects", folder);
+
+      Files.createDirectories(bytesPath);
+      Path filePath = Paths.get(".LumiGit", "objects",folder, fileName);
+
+      Files.write(filePath, objectBytes);
 
     } catch(IOException | NoSuchAlgorithmException e){
       e.printStackTrace();
