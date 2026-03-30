@@ -48,7 +48,15 @@ public class LumiGit{
 
       }
 
-      System.out.println(hexString.toString());
+      String folder = hexString.toString().substring(0,2);
+      String fileName = hexString.toString().substring(2, hexString.toString().length());
+
+      if(!Files.exists(Paths.get(".LumiGit"))){
+        System.out.println("Initialize first");
+        return;
+      }
+
+      Files.createDirectories(Paths.get(".LumiGit", "objects", folder));
 
     } catch(IOException | NoSuchAlgorithmException e){
       e.printStackTrace();
