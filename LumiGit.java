@@ -33,6 +33,31 @@ public class LumiGit{
     String folder = hash.substring(0, 2);
     String filename = hash.substring(2);
 
+    Path filePath = Paths.get(".LumiGit", "objects",folder, filename);
+
+    try{
+      byte[] content = Files.readAllBytes(filePath);
+
+      int nullByteIndex = -1;
+      for(int i=0; i<content.length; i++){
+        if(content[i] == 0){
+          nullByteIndex = i;
+          break;
+        }
+      }
+
+      String codeContent = new String(content, nullByteIndex+1,content.length-(nullByteIndex+1) , StandardCharsets.UTF_8);
+
+
+
+      for(char a: codeContent.toCharArray()){
+        System.out.print(a);
+      }
+
+    }catch(IOException e){
+      e.printStackTrace();
+    }
+   // test with c8d7500b8e8cd2930568fcae41ddc288a5617540
 
   }
 
