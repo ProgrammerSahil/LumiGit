@@ -20,6 +20,20 @@ public class LumiGit{
       }
       hash_objects(args[1]);
     }
+    else if(args[0].equals("cat-file")){
+      if(args.length <= 1 || args[1].length() != 40){
+        System.out.println("Please Provide a valid hash");
+        return;
+      }
+      cat_file(args[1]);
+    }
+  }
+
+  private static void cat_file(String hash){
+    String folder = hash.substring(0, 2);
+    String filename = hash.substring(2);
+
+
   }
 
   private static void hash_objects(String file){
