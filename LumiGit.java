@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.io.File;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.stream.Stream;
 
 public class LumiGit{
   public static void main(String[] args){
@@ -18,7 +19,8 @@ public class LumiGit{
         System.out.println("Please Provide Filename");
         return;
       }
-      hash_objects(args[1]);
+      byte[] output = hash_objects(args[1]);
+
     }
     else if(args[0].equals("cat-file")){
       if(args.length <= 1 || args[1].length() != 40){
@@ -27,7 +29,27 @@ public class LumiGit{
       }
       cat_file(args[1]);
     }
+    else if(args[0].equals("write-tree")){
+      write_tree();
+    }
   }
+
+
+
+  private static void write_tree(){
+    try(Stream<Path> a = Files.list(Paths.get("."))) {
+
+      a.forEach(item -> {
+        System.out.println(item);
+      });
+
+    }catch(IOException e){
+      e.printStackTrace();
+    }
+  }
+
+
+
 
   private static void cat_file(String hash){
     String folder = hash.substring(0, 2);
@@ -61,7 +83,7 @@ public class LumiGit{
 
   }
 
-  private static void hash_objects(String file){
+  private static byte[] hash_objects(String file){
 
     Path path = Paths.get(file);
 
@@ -92,7 +114,7 @@ public class LumiGit{
 
       if(!Files.exists(Paths.get(".LumiGit"))){
         System.out.println("Initialize first");
-        return;
+        return new byte[1];
       }
 
       Path bytesPath = Paths.get(".LumiGit", "objects", folder);
@@ -102,8 +124,11 @@ public class LumiGit{
 
       Files.write(filePath, objectBytes);
 
+      return hashBytes;
+
     } catch(IOException | NoSuchAlgorithmException e){
       e.printStackTrace();
+      return new byte[1];
     }
 
 
