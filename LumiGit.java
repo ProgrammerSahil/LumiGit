@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 public class LumiGit {
   public static void main(String[] args) {
     if (args.length == 0) return;
+
     if (args[0].equals("init")) {
       init();
     } else if (args[0].equals("hash-object")) {
@@ -20,7 +21,7 @@ public class LumiGit {
         System.out.println("Please Provide Filename");
         return;
       }
-      byte[] output = hash_objects(args[1]);
+      hash_objects(args[1]);
     } else if (args[0].equals("cat-file")) {
       if (args.length <= 1 || args[1].length() != 40) {
         System.out.println("Please Provide a valid hash");
@@ -29,6 +30,27 @@ public class LumiGit {
       cat_file(args[1]);
     } else if (args[0].equals("write-tree")) {
       write_tree();
+    } else if (args[0].equals("commit-tree")) {
+      if (args.length <= 1) {
+        System.out.println("Please provide a tree hash");
+        return;
+      }
+
+      String treeHash = args[1];
+      String parentHash = null;
+      String message = "";
+
+      for (int i = 2; i < args.length; i++) {
+        if (args[i].equals("-p") && i + 1 < args.length) {
+          parentHash = args[i + 1];
+          i++;
+        } else if (args[i].equals("-m") && i + 1 < args.length) {
+          message = args[i + 1];
+          i++;
+        }
+      }
+
+      commit_tree(treeHash, parentHash, message);
     }
   }
 
@@ -68,7 +90,7 @@ public class LumiGit {
 
     Path bytesPath = Paths.get(".LumiGit", "objects", folder);
     Files.createDirectories(bytesPath);
-    
+
     Path filePath = bytesPath.resolve(fileName);
     Files.write(filePath, objectBytes);
 
@@ -88,6 +110,7 @@ public class LumiGit {
   private static void write_tree() {
     try (Stream<Path> stream = Files.list(Paths.get("."))) {
       List<Path> filteredFiles = stream
+              .filter(Files::isRegularFile)
               .filter(path -> !path.getFileName().toString().equals(".LumiGit"))
               .filter(path -> !path.getFileName().toString().equals(".gitignore"))
               .filter(path -> !path.getFileName().toString().equals("LumiGit.java"))
@@ -101,7 +124,7 @@ public class LumiGit {
       for (Path file : filteredFiles) {
         String name = file.getFileName().toString();
         byte[] blobHash = hash_objects(name);
-        
+
         treeBody.write("100644 ".getBytes(StandardCharsets.UTF_8));
         treeBody.write(name.getBytes(StandardCharsets.UTF_8));
         treeBody.write(0);
@@ -110,10 +133,37 @@ public class LumiGit {
 
       byte[] allTreeEntries = treeBody.toByteArray();
       byte[] treeHash = save_object("tree", allTreeEntries);
-      
+
       System.out.println(bytesToHex(treeHash));
 
     } catch (IOException | NoSuchAlgorithmException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private static void commit_tree(String treeHash, String parentHash, String message) {
+    StringBuilder commitData = new StringBuilder();
+
+    commitData.append("tree ").append(treeHash).append("\n");
+
+    if (parentHash != null) {
+      commitData.append("parent ").append(parentHash).append("\n");
+    }
+
+    long timestamp = System.currentTimeMillis() / 1000L;
+    String authorInfo = "LocalUser " + timestamp + " +0530";
+
+    commitData.append("author ").append(authorInfo).append("\n");
+    commitData.append("committer ").append(authorInfo).append("\n");
+
+    commitData.append("\n");
+    commitData.append(message).append("\n");
+
+    try {
+      byte[] commitBytes = commitData.toString().getBytes(StandardCharsets.UTF_8);
+      byte[] commitHash = save_object("commit", commitBytes);
+      System.out.println(bytesToHex(commitHash));
+    } catch (Exception e) {
       e.printStackTrace();
     }
   }
